@@ -476,18 +476,20 @@ int main(int argc, char **argv)
 	char *s=NULL/*!!!*/,*s1=NULL/*!!!*/,*s2;
 	char **sargs;
 	int fdest,offset=0/*!!!*/,sargc,mode;
+	/*start sequence*/
 	mode = sortstart(argc,argv, &sargs,&offset,&sargc,&s1);
 	if (mode <0)
-		fprintf(stderr,"Error in sortstart function. Might be something with your sistem though\n");
+		fprintf(stderr,"Error in sortstart function. Might be something with your system though\n");
 	/*verifying file names*/
-	fprintf(stderr,"Hmmm\n");
-	/*OTJIADKA*/
-	for (i=0;i<sargc;i++)
-		{
-			fprintf(stderr,"%d : %s\n",i,sargs[i]);
-		}
 	versargs(&sargs,&sargc);
-	fprintf(stderr,"HF\n");
+	
+	
+	/*exit sequence*/
+	
+	/*freeing filename array*/
+	for (i=0;i<sargc;i++)
+		free(sargs[i]);
+	free(sargs);
 		/*if (sargc<0)
 		fprintf(stderr,"a");
 	if (sargc=0)
