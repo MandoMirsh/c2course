@@ -221,12 +221,14 @@ void versargs(char *** sargs, int * sargc)
 	int fd;
 	i=0;
 	while(i<(*sargc))
-		//без б
 		{
 			fd = open((*sargs)[i],O_RDONLY);
+			printf("Yuppy K.A.");
 			if (fd<0)
 				{
+					printf("%s\n",(*sargs)[i]);
 					free((*sargs)[i]);
+					printf("o");
 					(*sargs)[i] = (*sargs)[*sargc-1];
 					(*sargc)--;
 				}
