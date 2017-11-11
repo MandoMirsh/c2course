@@ -468,7 +468,40 @@ void sort(char *name, int offset,int fdout, int r)
 void mfunc(char **sargs,int sargc,int fdout,int r)
 /*if it was an m key*/
 {
+	char *s1,*s2,*s3;
+	int fd1,fd2,fd3;
+	int i;
 	
+	s2 = newbuf();
+	s3 = newbuf();
+	fd2 = open(s2,O_CREAT|O_WRONLY,0666);
+	close(fd2);
+	fd3 = open(s2,O_CREAT|O_WRONLY,0666);
+	close(fd3);
+	//подготовили, теперь вращаем
+	for (i=0;i<sargc;i++)
+	{
+		s1 = sargs[i];
+		fd1 = open(s1,O_RDONLY);
+		fd2 = open(s2,O_RDONLY);
+		fd3 = open(s3,O_WRONLY|O_TRUNC|O_APPEND);
+		submerge(fd1,fd2,fd3,r);
+		
+		close(fd1);
+		close(fd2);
+		close(fd3);
+		
+		
+		s1 = s2;
+		s2 = s3;
+		s3 = s1;
+	}
+	remove(s3);
+	fd1 = open(s2,O_RDONLY);
+	while((s1 = fdgets(fd1))!=NULL)
+		{
+			write(fdout,s1,strlen(s1));
+		}
 }
 
 int main(int argc, char **argv)
