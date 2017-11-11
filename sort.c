@@ -196,7 +196,7 @@ int sortstart(int argc, char ** argv, char ***sargs,int * offset, int * sargc,ch
 					printf("i = %d\n%s\n",i,argv[i]);
 					/*sargs[buf--] = argv[i];
 					fprintf("%s\n",sargs[buf]);*/
-					(*sargs)[buf] = malloc(sizeof(char)*strlen(argv[i]));
+					(*sargs)[buf] = malloc(sizeof(char)*(strlen(argv[i])+1));
 					strcpy(((*sargs)[buf--]),argv[i]);
 				}				
 		}
