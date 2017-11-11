@@ -220,21 +220,23 @@ void versargs(char *** sargs, int * sargc)
 	int i;
 	int fd;
 	i=0;
-	while((i+1)<(*sargc))
+	while(i<(*sargc))
 		{
 			fd = open((*sargs)[i],O_RDONLY);
+			printf("Yuppy K.A.");
 			if (fd<0)
 				{
 					printf("%s\n",(*sargs)[i]);
 					free((*sargs)[i]);
-					(*sargs)[i] = malloc(strlen((*sargs)[*sargc-1]));
-					strcpy((*sargs)[i],(*sargs)[*sargc-1]);
-					free((*sargs)[*sargc-1]);
+					printf("o");
+					(*sargs)[i] = (*sargs)[*sargc-1];
 					(*sargc)--;
-					i++;
 				}
 			else
-				i++;
+				{
+					close(fd);
+					i++;
+				}
 		}
 }
 char * fdgets(int fd)
@@ -476,18 +478,20 @@ int main(int argc, char **argv)
 	char *s=NULL/*!!!*/,*s1=NULL/*!!!*/,*s2;
 	char **sargs;
 	int fdest,offset=0/*!!!*/,sargc,mode;
+	/*start sequence*/
 	mode = sortstart(argc,argv, &sargs,&offset,&sargc,&s1);
 	if (mode <0)
-		fprintf(stderr,"Error in sortstart function. Might be something with your sistem though\n");
+		fprintf(stderr,"Error in sortstart function. Might be something with your system though\n");
 	/*verifying file names*/
-	fprintf(stderr,"Hmmm\n");
-	/*OTJIADKA*/
+	versargs(&sargs,&sargc);
+	
+	
+	/*exit sequence*/
+	
+	/*freeing filename array*/
 	for (i=0;i<sargc;i++)
-		{
-			fprintf(stderr,"%d : %s\n",i,sargs[i]);
-		}
-	versargs(sargs,&sargc);
-	fprintf(stderr,"HF\n");
+		free(sargs[i]);
+	free(sargs);
 		/*if (sargc<0)
 		fprintf(stderr,"a");
 	if (sargc=0)
