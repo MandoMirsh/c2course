@@ -220,21 +220,21 @@ void versargs(char *** sargs, int * sargc)
 	int i;
 	int fd;
 	i=0;
-	while((i+1)<(*sargc))
+	while(i<(*sargc))
+		//без б
 		{
 			fd = open((*sargs)[i],O_RDONLY);
 			if (fd<0)
 				{
-					printf("%s\n",(*sargs)[i]);
 					free((*sargs)[i]);
-					(*sargs)[i] = malloc(strlen((*sargs)[*sargc-1]));
-					strcpy((*sargs)[i],(*sargs)[*sargc-1]);
-					free((*sargs)[*sargc-1]);
+					(*sargs)[i] = (*sargs)[*sargc-1];
 					(*sargc)--;
-					i++;
 				}
 			else
-				i++;
+				{
+					close(fd);
+					i++;
+				}
 		}
 }
 char * fdgets(int fd)
