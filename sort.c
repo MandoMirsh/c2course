@@ -486,7 +486,7 @@ int main(int argc, char **argv)
 		{
 			fprintf(stderr,"%d : %s\n",i,sargs[i]);
 		}
-	versargs(sargs,&sargc);
+	versargs(&sargs,&sargc);
 	fprintf(stderr,"HF\n");
 		/*if (sargc<0)
 		fprintf(stderr,"a");
