@@ -1,7 +1,7 @@
 /*
  * 3-4.c
  * 
- * Copyright 2017 seriu007 <seriu007@COMPUTER-PK>
+ * Copyright 2017 MandoMirsh <seriu007@COMPUTER-PK>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
