@@ -273,6 +273,7 @@ char * fdgets(int fd)
 							perror("realloc");
 							exit(5);
 						}
+					s = s1;
 				}
 		}
 	if (j ==0)
@@ -281,6 +282,28 @@ char * fdgets(int fd)
 			return NULL;
 		}
 		
+	if (c!='\n')
+		{
+			if (i==j)
+				{
+					t=0;
+					i*=2;
+					s1 = NULL;
+					while((!(s1)&&(t<4)))
+						{
+							s1 = realloc(s,i);
+							t++;
+						}
+					if (t==4)
+						{
+							perror("realloc");
+							exit(5);
+						}
+					s = s1;
+				}
+			
+			s[j++]='\n';
+		}
 	return s;
 }
 
