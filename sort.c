@@ -253,25 +253,28 @@ char * fdgets(int fd)
 				{
 					perror("read");
 				}
-			s[j++]=c;
-			lever = (c=='\n');
+			else
+			{
+				s[j++]=c;
+				lever = (c=='\n');
 			
-			if(i==j)
-				{
-					t=0;
-					i*=2;
-					s1 = NULL;
-					while((!(s1)&&(t<4)))
-						{
-							s1 = realloc(s,i);
-							t++;
-						}
-					if (t==4)
-						{
-							perror("realloc");
-							exit(5);
-						}
-				}
+				if(i==j)
+					{
+						t=0;
+						i*=2;
+						s1 = NULL;
+						while((!(s1)&&(t<4)))
+							{
+								s1 = realloc(s,i);
+								t++;
+							}
+						if (t==4)
+							{
+								perror("realloc");
+								exit(5);
+							}
+					}
+			}
 		}
 	if (j ==0)
 		{
@@ -524,7 +527,7 @@ int main(int argc, char **argv)
 	versargs(&sargs,&sargc);
 	if (s1)
 		{
-			if((fdest = open(s1,O_CREAT|O_WRONLY|O_TRUNC|O_APPEND))<0)
+			if((fdest = open(s1,O_CREAT|O_WRONLY|O_TRUNC|O_APPEND,0666))<0)
 				{
 					perror("can't open destination file");
 					fdest = 1;
