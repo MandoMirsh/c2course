@@ -305,7 +305,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 	char *s1,*s2;
 	j1 = filelen(fd1);
 	j2 = filelen(fd2);
-	printf("%d,%d\n",j1,j2);
 	if ((j1))
 		{
 			s1 = fdgets(fd1);
@@ -316,7 +315,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 		}
 	while((j1)&&(j2))
 		{
-			printf("s1 : %s\ns2 : %s\n",s1,s2);
  			if (((strcmp(s1,s2))*(1+(r)*(-2))>0))
 				{
 					write(fdres,s2,strlen(s2));
@@ -334,7 +332,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 		}
 	while(j2)
 		{
-			printf("s2 : %s",s2);
 			write(fdres,s2,strlen(s2));
 			free(s2);
 			s2 = fdgets(fd2);
@@ -342,7 +339,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 		}
 	while(j1)
 		{
-			printf("s1 : %s",s1);
 			write(fdres,s1,strlen(s1));
 			free(s1);
 			s1 = fdgets(fd1);
@@ -472,21 +468,10 @@ void mfunc(char **sargs,int sargc,int fdout,int r)
 	//подготовили, теперь вращаем
 	for (i=0;i<sargc;i++)
 	{
-		printf("i=%d\n",i);
-		sleep(1);
 		s1 = sargs[i];
-		printf("s1=%s\n",s1);
-		printf("s2=%s\n",s2);
-		printf("s3=%s\n",s3);
 		fd1 = open(s1,O_RDONLY);
-		printf("fd1 = %d\n",fd1);
-		sleep(1);
 		fd2 = open(s2,O_RDONLY);
-		printf("fd2 = %d\n",fd2);
-		sleep(1);
 		fd3 = open(s3,O_WRONLY|O_TRUNC|O_APPEND,0666);
-		printf("fd3 = %d\n",fd3);
-		sleep(1);
 		submerge(fd1,fd2,fd3,r);
 		//закрываем дескрипторы файлов
 		close(fd1);
@@ -498,10 +483,6 @@ void mfunc(char **sargs,int sargc,int fdout,int r)
 		s1 = s2;
 		s2 = s3;
 		s3 = s1;
-		printf("s1=%s\n",s1);
-		printf("s2=%s\n",s2);
-		printf("s3=%s\n",s3);
-		sleep(2);
 	}
 	remove(s3);
 	fd1 = open(s2,O_RDONLY);
@@ -535,15 +516,11 @@ int main(int argc, char **argv)
 		} 
 	if (!(mode&8))
 		{
-			printf("branch1\n");
-			sleep(1);
 			for (i=0;i<sargc;i++)
 				sort(sargs[i],offset,fdest,mode&1);
 		}
 	else
 		{
-			printf("branch 2\n");
-			sleep(1);
 			mfunc(sargs,sargc,fdest,mode&1);
 		}
 	/*exit sequence*/
