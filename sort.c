@@ -273,6 +273,8 @@ char * fdgets(int fd)
 								perror("realloc");
 								exit(5);
 							}
+						else 
+							s = s1;
 					}
 			}
 		}
