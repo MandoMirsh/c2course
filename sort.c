@@ -1,44 +1,3 @@
-/*
- * sort.c
- * 
- * Copyright 2017 Черевков С.Н. <s02160255@debian>
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
- * 
- * 
- */
-/*0.0006
- * 	cmdpar and sortstart imported from previous version
- * 	newbuf is rewritten newname
- * 	fdgets is written and NOW works correctly
- *  filelen is written and works
- * 	submerege is written
- * 	merge is in progress
- * 	*/
- /*0.0007
-  * bug is found and fixed in fdgets
-  * submerge tested and works correctly
-  * merge is written and tested
-  * */
- /*0.0008
-  * sort is written
-  * main is in progress
-  * mfunc is in progress
-  * */
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -171,7 +130,7 @@ int sortstart(int argc, char ** argv, char ***sargs,int * offset, int * sargc,ch
 		(*out) = NULL;
 	else
 		{
-			(*out) = malloc(sizeof(argv[o+1]));
+			(*out) = malloc(sizeof(char)*strlen(argv[o+1])+1);
 			strcpy(*out,argv[o+1]);
 		}
 	/*sargs*/
@@ -225,6 +184,7 @@ void versargs(char *** sargs, int * sargc)
 			fd = open((*sargs)[i],O_RDONLY);
 			if (fd<0)
 				{
+					printf("%s\n",(*sargs)[i]);
 					free((*sargs)[i]);
 					(*sargs)[i] = (*sargs)[*sargc-1];
 					(*sargc)--;
@@ -238,7 +198,7 @@ void versargs(char *** sargs, int * sargc)
 }
 char * fdgets(int fd)
 /*fd - file handle(readable)
-  returns string from current position to nrearest '\n' or to the end of file*/
+//returns string from current position to nrearest '\n' or to the end of file*/
 {
 	char *s,*s1,c;
 	int i=0,j=0,k,t,lever = 0;
@@ -252,55 +212,37 @@ char * fdgets(int fd)
 				{
 					perror("read");
 				}
-			s[j++]=c;
-			lever = (c=='\n');
+			else
+			{
+				s[j++]=c;
+				lever = (c=='\n');
 			
-			if(i==j)
-				{
-					t=0;
-					i*=2;
-					s1 = NULL;
-					while((!(s1)&&(t<4)))
-						{
-							s1 = realloc(s,i);
-							t++;
-						}
-					if (t==4)
-						{
-							perror("realloc");
-							exit(5);
-						}
-					s = s1;
-				}
+				if(i==j)
+					{
+						t=0;
+						i*=2;
+						s1 = NULL;
+						while((!(s1)&&(t<4)))
+							{
+								s1 = realloc(s,i);
+								t++;
+							}
+						if (t==4)
+							{
+								perror("realloc");
+								exit(5);
+							}
+						else 
+							s = s1;
+					}
+			}
 		}
 	if (j ==0)
 		{
 			free(s);
 			return NULL;
 		}
-		
-	if (c!='\n')
-		{
-			if (i==j)
-				{
-					t=0;
-					i*=2;
-					s1 = NULL;
-					while((!(s1)&&(t<4)))
-						{
-							s1 = realloc(s,i);
-							t++;
-						}
-					if (t==4)
-						{
-							perror("realloc");
-							exit(5);
-						}
-					s = s1;
-				}
-			
-			s[j++]='\n';
-		}
+	s[j++] = '\0';	
 	return s;
 }
 
@@ -308,9 +250,9 @@ int filelen(fd)
 /*need newly opened file*/
 {
 	int i=0;
-	char *s;
+	char *s=NULL;
 	lseek(fd,0,SEEK_SET);
-	while ((s = fdgets(fd))!=0)
+	while ((s = fdgets(fd))!=NULL)
 		{
 			free(s);
 			i++;
@@ -318,26 +260,12 @@ int filelen(fd)
 	lseek(fd,0,SEEK_SET);
 	return i;
 }
-
-void lcpy(fd1,fd2)
-//copy file from fd1 to fd2 without prepositioning
-{
-	char *s;
-	while((s = fdgets(fd1))!=NULL)
-		{
-			write(fd2,s,strlen(s));
-			free(s);
-		}
-	close(fd1);
-}
-
 void submerge(int fd1,int fd2,int fdres,int r)
 {
 	int j1,j2;
 	char *s1,*s2;
 	j1 = filelen(fd1);
 	j2 = filelen(fd2);
-	printf("%d,%d\n",j1,j2);
 	if ((j1))
 		{
 			s1 = fdgets(fd1);
@@ -348,7 +276,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 		}
 	while((j1)&&(j2))
 		{
-			printf("s1 : %s\ns2 : %s\n",s1,s2);
  			if (((strcmp(s1,s2))*(1+(r)*(-2))>0))
 				{
 					write(fdres,s2,strlen(s2));
@@ -366,7 +293,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 		}
 	while(j2)
 		{
-			printf("s2 : %s",s2);
 			write(fdres,s2,strlen(s2));
 			free(s2);
 			s2 = fdgets(fd2);
@@ -374,7 +300,6 @@ void submerge(int fd1,int fd2,int fdres,int r)
 		}
 	while(j1)
 		{
-			printf("s1 : %s",s1);
 			write(fdres,s1,strlen(s1));
 			free(s1);
 			s1 = fdgets(fd1);
@@ -394,68 +319,53 @@ void merge(char * name,int r)
 		{
 			return;
 		}
-	if(k==2)
-		{
-			s1 = fdgets(fd);
-			s2 = fdgets(fd);
-			close(fd);
-			if (((strcmp(s1,s2))*(1+(r)*(-2))<0))
-				{
-					free(s1);
-					free(s2);
-					return;
-				}
-			else
-				{
-					fd = open(name,O_WRONLY);
-					write(fd, s2, strlen(s2));
-					free(s2);
-					write(fd,s1,strlen(s1));
-					free(s1);
-					close(fd);
-					return;
-				}
-		}
-	/*more than two lines
-	//create subfiles*/
-	s1 = newbuf();
-	s2 = newbuf();
-	fd1 = open(s1,O_WRONLY|O_CREAT|O_APPEND|O_TRUNC,0666);
-	fd2 = open(s2,O_WRONLY|O_CREAT|O_APPEND|O_TRUNC,0666);
-	j = k/2;
-	for (i=0;i<j;i++)
-		{
-			s = fdgets(fd);
-			write(fd1,s,strlen(s));
-			free(s);
-		}
-		close(fd1);
-	while(i<k)
-		{
-			s = fdgets(fd);
-			write(fd2,s,strlen(s));
-			free(s);
-			i++;
-		}
-	close(fd2);
-	close(fd);
-	/*merge subfiles*/
-	merge(s1,r);
-	merge(s2,r);
-	/*now we use submerge to sort lines back into file*/
-	fd1 = open(s1,O_RDONLY);
-	fd2 = open(s2,O_RDONLY);
-	fd = open(name,O_WRONLY|O_APPEND|O_TRUNC);	
-	submerge(fd1,fd2,fd,r);
-	/*finished. now we close all files and dispose of the subfiles*/
+	else
+	{
+		/*more than two lines
+		  create subfiles*/
+		s1 = newbuf();
+		s2 = newbuf();
+		//open them into writing
+		fd1 = open(s1,O_WRONLY|O_CREAT|O_APPEND|O_TRUNC,0666);
+		fd2 = open(s2,O_WRONLY|O_CREAT|O_APPEND|O_TRUNC,0666);
+		//write to the first one
+		j = k/2;
+		for (i=0;i<j;i++)
+			{
+				s = fdgets(fd);
+				write(fd1,s,strlen(s));
+				free(s);
+			}
+			close(fd1);
+		//write to the second one	
+		while(i<k)
+			{
+				s = fdgets(fd);
+				write(fd2,s,strlen(s));
+				free(s);
+				i++;
+			}
+		close(fd2);
+		close(fd);
+		/*merge subfiles*/
+		merge(s1,r);
+		merge(s2,r);
+		/*now we use submerge to sort lines back into file*/
+		fd1 = open(s1,O_RDONLY);
+		fd2 = open(s2,O_RDONLY);
+		fd = open(name,O_WRONLY|O_APPEND|O_TRUNC);	
+		submerge(fd1,fd2,fd,r);
+		/*finished. now we close all files and dispose of the subfiles*/
 	
-	close(fd1);
-	close(fd2);
-	close(fd);
-	remove(s1);
-	remove(s2);
+		close(fd1);
+		close(fd2);
+		close(fd);
+		remove(s1);
+		remove(s2);
+		free(s1);
+		free(s2);
+	}
 }
-
 void sort(char *name, int offset,int fdout, int r)
 /*name must be valid*/
 {
@@ -468,36 +378,43 @@ void sort(char *name, int offset,int fdout, int r)
 	if (flen<=offset)
 		return;
 	s1 = newbuf();
-	fd = open(s1,O_CREAT|O_WRONLY|O_APPEND|O_TRUNC,0666);
-	/*skip*/
-	printf("file opened\n");
-	for (i=0;i<offset;i++)
+	if ((fd = open(s1,O_CREAT|O_WRONLY|O_APPEND|O_TRUNC,0666))<0)
 		{
-			s = fdgets(fd0);
-			free(s);
+			perror("creating file");
 		}
-	/*write to subfile*/
-	while(i<flen)
+	else
 		{
-			s = fdgets(fd0);
-			write(fd,s,strlen(s));
-			i++;
-		}
-	close(fd);
-	close(fd0);
-	merge(s1,r);
-	/*file sorted.*/
-	fd = open(s1,O_RDONLY);
-	flen = filelen(fd);
-	for (i = 0;i<flen;i++)
-		{
-			s = fdgets(fd);
-			write(fdout,s,strlen(s));
-			free(s);
-		}
-	close(fd);
-	//remove(s1);		
-}
+		/*skip*/
+		for (i=0;i<offset;i++)
+			{
+				s = fdgets(fd0);
+				free(s);
+			}
+		/*write to subfile*/
+		while(i<flen)
+			{
+				s = fdgets(fd0);
+				write(fd,s,strlen(s));
+				free(s);
+				i++;
+			}
+		close(fd);
+		close(fd0);
+		merge(s1,r);
+		/*file sorted.*/
+		fd = open(s1,O_RDONLY);
+		flen = filelen(fd);
+		for (i = 0;i<flen;i++)
+			{
+				s = fdgets(fd);
+				write(fdout,s,strlen(s));
+				free(s);
+			}
+		close(fd);
+		remove(s1);		
+	}
+}	
+
 void mfunc(char **sargs,int sargc,int fdout,int r)
 /*if it was an m key*/
 {
@@ -509,23 +426,22 @@ void mfunc(char **sargs,int sargc,int fdout,int r)
 	s3 = newbuf();
 	fd2 = open(s2,O_CREAT|O_WRONLY,0666);
 	close(fd2);
-	fd3 = open(s2,O_CREAT|O_WRONLY,0666);
+	fd3 = open(s3,O_CREAT|O_WRONLY,0666);
 	close(fd3);
 	//подготовили, теперь вращаем
 	for (i=0;i<sargc;i++)
 	{
 		s1 = sargs[i];
-		printf("%s\n",s1);
 		fd1 = open(s1,O_RDONLY);
 		fd2 = open(s2,O_RDONLY);
 		fd3 = open(s3,O_WRONLY|O_TRUNC|O_APPEND,0666);
-		printf("Hmmm\n");
 		submerge(fd1,fd2,fd3,r);
-		
+		//закрываем дескрипторы файлов
 		close(fd1);
 		close(fd2);
 		close(fd3);
 		
+		//перетасовываем имена
 		
 		s1 = s2;
 		s2 = s3;
@@ -538,75 +454,54 @@ void mfunc(char **sargs,int sargc,int fdout,int r)
 			write(fdout,s1,strlen(s1));
 			free(s1);
 		}
+	remove(s2);
+	free(s1);
+	free(s2);
+	free(s3);
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int fd1,fd2,fd3;
 	int i,flen;
 	char *s=NULL/*!!!*/,*s1=NULL/*!!!*/,*s2;
 	char **sargs;
-	int fdest,offset=0/*!!!*/,sargc,mode;
+	int fdest=1,offset=0/*!!!*/,sargc,mode;
+	/*start sequence*/
 	mode = sortstart(argc,argv, &sargs,&offset,&sargc,&s1);
 	if (mode <0)
 		fprintf(stderr,"Error in sortstart function. Might be something with your system though\n");
 	/*verifying file names*/
 	versargs(&sargs,&sargc);
-	//-o?
 	if (s1)
 		{
-			printf("-o\n");
-			s = newbuf();
-			fdest = open(s,O_WRONLY|O_CREAT|O_APPEND,0666);
-			if (fdest<0)
+			if((fdest = open(s1,O_CREAT|O_WRONLY|O_TRUNC|O_APPEND,0666))<0)
 				{
-					perror("can't create temp file\n");
-					exit(5);
+					perror("can't open destination file");
+					fdest = 1;
 				}
-		}
-	else 
-		fdest = 1;
-	printf("%d\n",fdest);
-	//main engine ( was -m or wasn't)?
-
-	/*fd1 = open(argv[1],O_RDONLY);
-	fd2 = open(argv[2],O_RDONLY);
-	fdest = open(argv[3],O_CREAT|O_APPEND|O_TRUNC|O_WRONLY);
-	submerge(fd1,fd2,fdest,0);
-	close(fdest);
-	close(fd1);
-	close(fd2);*/
-	if (mode&8)
-		//was -m
+		} 
+	if (!(mode&8))
 		{
-			printf("-m\n");
-			mfunc(sargs,sargc,fdest,mode&1);
-		}
-	else
-		{
-			printf("no -m\n");
 			for (i=0;i<sargc;i++)
 				sort(sargs[i],offset,fdest,mode&1);
 		}
-	//freeing filename array
+	else
+		{
+			mfunc(sargs,sargc,fdest,mode&1);
+		}
+	/*exit sequence*/
+	
+	/*freeing filename array*/
 	for (i=0;i<sargc;i++)
 		free(sargs[i]);
 	free(sargs);
-	if(s1)
+	
+	if (s1)
 		{
 			close(fdest);
-			fd1 = open(s,O_RDONLY);
-			fdest = open(s1,O_CREAT|O_APPEND|O_WRONLY|O_TRUNC);
-			while((s1 = fdgets(fd1))!=NULL)
-				{
-					write(fdest,s,strlen(s));
-					free(s);
-				}
-			close(fdest);
-			close(fd1);
-			remove(s);
+			free(s1);
 		}
-		
 	return 0;
 }
 
